@@ -15,10 +15,13 @@ def main():
 
     @bot.message_handler(content_types=['text'])
     def handle_text(message):
-        bot.send_message(message.chat.id, 'вы написали: ' + message.text)
 
-    bot.polling(none_stop=True, interval=0)
+        freelanceru = parser.FreelanceRu(message.text)
+        for task in freelanceru.run():
+            bot.send_message(message.chat.id, '\n'.join(task))
+
     print('Bot enabled')
+    bot.polling(none_stop=True, interval=0)
 
 
 if __name__ == "__main__":

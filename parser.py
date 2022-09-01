@@ -17,7 +17,7 @@ class Parser:
     def parse_data(self, data: str):
         pass
 
-    def parse_block(self, block):
+    def parse_tasks(self, tasks):
         pass
 
     def run(self):
@@ -26,7 +26,9 @@ class Parser:
 
 class FreelanceRu(Parser):
 
-    url = 'https://freelance.ru/project/search/pro'
+    def __init__(self, request_text: str):
+        super().__init__()
+        self.url = f'https://freelance.ru/project/search/pro?c=&q={request_text}&m=or&e=&f=&t=&o=0&o=1'
 
     def get_data(self):
         response = self.session.get(url=self.url)
@@ -34,32 +36,28 @@ class FreelanceRu(Parser):
 
     def parse_data(self, data: str):
         soup = BeautifulSoup(data, 'lxml')
-        tasks = soup.find_all('div', class_="box-shadow project highlight")
-        self.parse_tasks(tasks=tasks)
+        tasks = soup.find_all('div', class_="box-shadow project")
+        return self.parse_tasks(tasks=tasks)
 
     def parse_tasks(self, tasks):
-        print('=' * 150)
-        for task in tasks:
+        tasks_collection = []  # общий список заказов
+        for task in tasks:  # цикл заполнения общего списка заказов
             lines = task.text.split('\n')
+            lines = [line.strip() for line in lines if line]
+            lines.insert(0, 'https://freelance.ru' + task.find('a', 'description')['href'])  # вставка ссылки на заказ
 
-            # while '' in lines:
-            #     lines.remove('')
+            tasks_collection.append(lines)
 
-            for line in lines:
-                if line != '':
-                    print(line.strip())
-
-            # print(task.text.strip())
-            print('=' * 150)
+        return tasks_collection
 
     def run(self):
         data = self.get_data()
-        self.parse_data(data=data)
+        return self.parse_data(data=data)
 
 
 def main():
-    freelanceru = FreelanceRu()
-    freelanceru.run()
+    freelanceru = FreelanceRu('')
+    print(freelanceru.run())
 
 
 if __name__ == '__main__':
