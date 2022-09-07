@@ -17,8 +17,14 @@ def main():
     def handle_text(message):
 
         freelanceru = parser.FreelanceRu(message.text)
-        for task in freelanceru.run():
-            bot.send_message(message.chat.id, '\n'.join(task))
+        print(message.text)
+
+        tasks = freelanceru.run()
+        if tasks:
+            for task in tasks:
+                bot.send_message(message.chat.id, '\n'.join(task))
+        else:
+            bot.send_message(message.chat.id, 'По данному запросу, работы не найдено')
 
     print('Bot enabled')
     bot.polling(none_stop=True, interval=0)
